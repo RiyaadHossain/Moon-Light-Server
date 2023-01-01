@@ -70,6 +70,12 @@ const run = async () => {
       res.send({ status: true, data: jobs });
     });
 
+    app.get("/job", async (req, res) => {
+      const jobData = req.body;
+      const result = await jobCollection.insertOne(jobData);
+      res.send(result);
+    });
+
   } catch (err) {
     console.log(err)
   }
