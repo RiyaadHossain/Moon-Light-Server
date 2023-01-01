@@ -19,37 +19,59 @@ const client = new MongoClient(uri, {
 const run = async () => {
   try {
     const db = client.db("hoteltastic");
-    const productCollection = db.collection("products");
+    const jobboxuserCollection = db.collection("jobBoxUsers");
+    const jobCollection = db.collection("jobs");
 
-    app.get("/products", async (req, res) => {
-      const cursor = productCollection.find({});
-      const product = await cursor.toArray();
-
-      res.send({ status: true, data: product });
+    app.get("/jobboxusers", async (req, res) => {
+      const cursor = jobboxuserCollection.find({});
+      const jobboxuser = await cursor.toArray();
+      res.send({ status: true, data: jobboxuser });
     });
 
-    app.post("/product", async (req, res) => {
-      const product = req.body;
+    app.get("/jobboxuserbyemail/:email", async (req, res) => {
+      const { email } = req.params
+      const jobboxuser = await jobboxuserCollection.findOne({ email });
+      if (jobboxuser) {
+        return res.send({ status: true, data: jobboxuser });
+      }
 
-      const result = await productCollection.insertOne(product);
+      res.send({ status: false })
+    });
 
+    app.post("/jobboxuser", async (req, res) => {
+      const jobboxuser = req.body;
+      const result = await jobboxuserCollection.insertOne(jobboxuser);
       res.send(result);
     });
 
-    app.patch("/product/:id", async (req, res) => {
+    app.patch("/jobboxuser/:id", async (req, res) => {
       const id = req.params.id;
       const data = req.body
-      const result = await productCollection.updateOne({ _id: ObjectId(id) }, { $set: data });
+      const result = await jobboxuserCollection.updateOne({ _id: ObjectId(id) }, { $set: data });
       res.send(result);
     });
 
-    app.delete("/product/:id", async (req, res) => {
+    app.delete("/jobboxuser/:id", async (req, res) => {
       const id = req.params.id;
-
-      const result = await productCollection.deleteOne({ _id: ObjectId(id) });
+      const result = await jobboxuserCollection.deleteOne({ _id: ObjectId(id) });
       res.send(result);
     });
-  } finally {
+
+    app.get("/jobs", async (req, res) => {
+      const cursor = jobCollection.find({});
+      const jobs = await cursor.toArray();
+      res.send({ status: true, data: jobs });
+    });
+
+    app.get("/job/:id", async (req, res) => {
+      const { id } = req.params
+      const cursor = jobCollection.findOne({ _id: id });
+      const jobs = await cursor.toArray();
+      res.send({ status: true, data: jobs });
+    });
+
+  } catch (err) {
+    console.log(err)
   }
 };
 
