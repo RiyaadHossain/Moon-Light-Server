@@ -1,10 +1,10 @@
-require("dotenv").config();
 const express = require("express");
-const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const app = express();
 const port = process.env.PORT || 5000;
-
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const cors = require("cors");
+
+require("dotenv").config();
 
 app.use(cors());
 app.use(express.json());
@@ -65,14 +65,26 @@ const run = async () => {
 
     app.get("/job/:id", async (req, res) => {
       const { id } = req.params
-      const cursor = jobCollection.findOne({ _id: id });
-      const jobs = await cursor.toArray();
-      res.send({ status: true, data: jobs });
+      const job = await jobCollection.findOne({ _id: ObjectId(id) });
+      res.send({ status: true, data: job });
     });
 
-    app.get("/job", async (req, res) => {
+    app.post("/add-job", async (req, res) => {
       const jobData = req.body;
       const result = await jobCollection.insertOne(jobData);
+      res.send(result);
+    });
+
+    app.patch("/job/:id", async (req, res) => {
+      const jobData = req.body;
+      const {id} = req.params
+      const result = await jobCollection.updateOne({_id: id}, {$set: jobData});
+      res.send(result);
+    });
+
+    app.delete("/job/:id", async (req, res) => {
+      const {id} = req.params
+      const result = await jobCollection.deleteOne({_id: id});
       res.send(result);
     });
 
